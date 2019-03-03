@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import requests,re,os,time
 from bs4 import BeautifulSoup
-
+from urllib.parse import urljoin
 class spider(object):
     def __init__(self):
         self.currentpath = os.getcwd()
@@ -21,6 +21,14 @@ class spider(object):
             self.enteralbum(albumurl)
 
         # nextpage
+        #   判断是否有下一页
+        soup = BeautifulSoup(pagesource,'html.parser')
+        currentpageli = soup.find('li',{'class':'page-current'})
+        nextli = currentpageli.findNext('li')
+        if nextli['class'] != 'jump':
+            nextpageurl = nextli.a['href']
+            nextpageurl = urljoin(menberpageurl,nextpageurl)
+            self.startbymenberpage(nextpageurl)
 
 
 
@@ -65,8 +73,8 @@ if __name__ == "__main__":
     albumurl = 'https://www.boundhub.com/albums/5239/bondage-outdoor-exposure-english-1-4/'
     photourl = 'https://www.boundhub.com/get_image/2/8f7386c6ef5bb7bf017db1e768be6f55/sources/5000/5239/114007.jpg/'
     testspider = spider()
-    #testspider.startbymenberpage(menberurl)
-    testspider.enteralbum(albumurl)
+    testspider.startbymenberpage(menberurl)
+    #testspider.enteralbum(albumurl)
     #testspider.downloadphoto(photourl,'Bondage outdoor exposure [English]1-4')
 
 
