@@ -32,6 +32,10 @@ random_proxies = st.random_proxy()
 random_headers = st.random_headers()
 response = requests.get(url, headers = random_headers, proxies = random_proxies)
 ```
+4. 项目提供了一个基于requests包修改的函数requests_st(), 使用方法与request.get()相同
+```bash
+response = st.requests_st(url)
+```
 
 ##拓展说明
 本程序在获取代理ip过程中还可以配合qiyeboy/IPProxyPool使用

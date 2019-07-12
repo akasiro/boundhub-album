@@ -29,7 +29,7 @@ class spider(object):
                 self.enteralbum(albumurl)
         except:
             print('changing proxies')
-            self.proxies = self.st.change_proxy()
+            self.proxies = self.st.random_proxy()
             print('proxy change')
             self.startbymenberpage(menberpageurl)
         # nextpage
@@ -64,10 +64,10 @@ class spider(object):
 
             #报告下载成功，并休息
             print('success download {}'.format(title))
-            time.sleep(20)
+            time.sleep(5)
         except:
             print('changing proxies')
-            self.proxies = self.st.change_proxy()
+            self.proxies = self.st.random_proxy()
             print('proxy change')
             self.enteralbum(albumurl)
 
@@ -83,10 +83,10 @@ class spider(object):
                 r = requests.get(purl, headers = self.headers, proxies = self.proxies)
                 with open(photopath,'ab+') as f:
                     f.write(r.content)
-                time.sleep(10)
+                time.sleep(5)
             except:
                 print('changing proxies')
-                self.proxies = self.st.change_proxy()
+                self.proxies = self.st.random_proxy()
                 print('proxy change')
                 self.downloadphoto(purl,albumpath)
 

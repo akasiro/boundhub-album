@@ -10,6 +10,7 @@ class scrapy_tool():
         path = os.path.dirname(__file__)
         with open(os.path.join(path,'user_agent'),'r') as f:
             self.list_user_agent = f.readlines()
+            self.list_user_agent = [i.replace('\n','') for i in self.list_user_agent]
         self.china = china
         self.test_url = test_url
         if china:
@@ -17,18 +18,26 @@ class scrapy_tool():
         else:
             self.ip_list = self.get_ip_list1()
         self.proxies = {}
+        self.headers = {}
+        self.requests_st_iter_times = 0#记录request_st循环次数
 
     #获取随机header
     def random_headers(self):
-        headers = {
-            'User-Agent': random.choice(self.list_user_agent).replace('\n','')
+        if self.headers != {}:
+            self.list_user_agent.remove(self.headers['User-Agent'])
+        self.headers = {
+            'User-Agent': random.choice(self.list_user_agent)
         }
-        return headers
+        return self.headers
 
     #获取随机代理ip
     def random_proxy(self):
+        if self.proxies != {}:
+            self.ip_list.remove(self.proxies['http'].replace('http://',''))
+            self.proxies = {}
         while True:
             if len(self.ip_list) == 0:
+                #print('warning: no ip list')
                 break
             ip_temp = random.choice(self.ip_list)
             proxies_temp = {
@@ -84,13 +93,41 @@ class scrapy_tool():
         return ip_list
     #刷新ip池
     def refresh_ip_pool(self):
-        self.ip_list = list(set(self.get_ip_list1() + self.get_ip_list2()))
-    #换代理ip
-    def change_proxy(self):
-        if self.proxies != {}:
-            self.ip_list.remove(self.proxies['http'].replace('http://',''))
-            self.proxies = {}
-        return self.random_proxy()
+        if self.china:
+            self.ip_list = list(set(self.get_ip_list1() + self.get_ip_list2()))
+        else:
+            self.ip_list = self.get_ip_list1()
+
+
+    #自带proxies和header的request
+    def requests_st(self,url, **kwargs):
+        response = []
+        if self.proxies == {}:
+            self.proxies = self.random_proxy()
+        if self.headers == {}:
+            self.headers = self.random_headers()
+        while True:
+            if len(self.ip_list) == 0:
+                if self.requests_st_iter_times >3:
+                    break
+                self.refresh_ip_pool()
+                self.headers = self.random_headers()
+                self.proxies = self.random_proxy()
+                self.requests_st_iter_times+=1
+            try:
+                response = requests.get(url,headers = self.headers, proxies = self.proxies, **kwargs)
+                if response.status_code == 200:
+                    self.requests_st_iter_times = 0
+                    break
+                else:
+                    self.proxies = self.random_proxy()
+                    continue
+            except:
+                self.proxies = self.random_proxy()
+                continue
+        return response
+
+
 
 
 
@@ -98,8 +135,13 @@ class scrapy_tool():
 
 
 if __name__ == '__main__':
-    url = 'https://www.boundhub.com/'
-    st = scrapy_tool(url,china= False)
-    print(st.random_headers())
-    print(st.random_proxy())
-    print(st.change_proxy())
+    url = 'https://www.baidu.com/'
+    url2 = 'https://www.google.com/'
+    st = scrapy_tool(url)
+    print(len(st.ip_list))
+    # print(st.random_headers())
+    # print(st.random_proxy())
+    # print(st.random_headers())
+    # print(st.random_proxy())
+    # r = st.requests_st(url2)
+    # print(r.text)
