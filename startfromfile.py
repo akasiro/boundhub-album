@@ -39,7 +39,7 @@ def enteralbum2(filename,filepath = 'html'):
     
     #报告下载成功，并休息
     print('\nsuccess download {}'.format(title))
-    time.sleep(5)
+    time.sleep(1)
 def downloadphoto2(purl, albumpath):
     pattern = re.compile(r'\d+.jpg')
     photoname = re.findall(pattern,purl)[0]
@@ -50,7 +50,7 @@ def downloadphoto2(purl, albumpath):
         with open(photopath, 'ab+') as f:
             f.write(r.content)
         #print(purl)
-        time.sleep(5)
+        time.sleep(1)
 
 def download_by_htmls(filepath = 'html'):
     for i in os.listdir(filepath):
